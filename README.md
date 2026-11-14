@@ -4,21 +4,7 @@ A 1v1 neon dodgeball duel for one keyboard. Two players, one court, one ball —
 and the ball gets faster every single time it touches anything. Nobody scores.
 You survive the round, or you get flattened.
 
-Built for **Godot 4.7** (tested on 4.7.2; the code is 4.4-compatible, so older
-4.x editors work too — they will just offer to convert the project). GDScript,
-GL Compatibility renderer, exports to the web with thread support off, and needs
-no art or audio assets: every mesh, material, court line and sound is generated
-at runtime.
 
----
-
-## Run it
-
-1. Install [Godot 4.7](https://godotengine.org/download) (standard build, not .NET).
-2. Open the folder in the editor (`project.godot`).
-3. Press **F5**.
-
-The first launch takes a second while Godot builds its import cache.
 
 ## Controls
 
@@ -85,51 +71,5 @@ is active your foot ring turns its colour and its name and remaining time sit
 under your round pips. Every powerup is cleared when the round ends, so nobody
 carries an advantage into the next serve.
 
-## Project layout
 
-```
-project.godot
-export_presets.cfg            web preset, thread support OFF
-scenes/    menu · main · arena · player · ball · hud
-scripts/   game.gd (autoload) · match · arena · player · ai_player · ball · hud · menu · camera_rig · sfx
-.github/workflows/export-web.yml
-```
 
-The ball, the players and the court bounds are **not** driven by Godot physics:
-`ball.gd` integrates motion itself in sub-steps of ~0.12 m and reflects off
-`arena.half_x / half_z`. That is a deliberate change from the original sketch.
-It buys three things: no tunnelling at 108 m/s, exact bounces, and an AI whose
-prediction uses the identical maths (see `ai_player.gd → _predict()`), so it
-never fights engine friction. The numbers from the design are unchanged.
-
-## Tuning cheat sheet
-
-The four numbers that decide how it feels, all in one line each:
-
-| Knob | File | Value |
-| --- | --- | --- |
-| `BASE_SPEED` | `scripts/ball.gd` | 9.0 m/s |
-| `WALL_HEAT` | `scripts/ball.gd` | 1.08 |
-| `CATCH_WINDOW` | `scripts/player.gd` | 0.22 s |
-| `CARRYOVER` | `scripts/match.gd` | 0.75 |
-
-## Export to the web / itch.io
-
-**From the editor:** Project → Export → *Web* → Export Project. The preset
-already writes to `build/web/index.html` with thread support off, which is what
-itch.io needs. Zip the *contents* of `build/web`, upload it as an HTML project,
-tick "playable in browser", and use 1280×720 as the embed size.
-
-**From CI:** push to `main`. `.github/workflows/export-web.yml` installs Godot
-4.4.1 with its export templates, builds the web export, and uploads
-`return-to-sender-web.zip` as a workflow artifact.
-
-Web export notes: the project uses the GL Compatibility renderer on purpose —
-it is the only renderer that runs reliably in every browser without WebGPU.
-Glow still works there, which is most of the look.
-
-## Detailed docs
-
-- `DESIGN.md` — the full design and build spec, saved as written.
-- `FEEL.md` — how the feel is actually engineered: every number, why it is that
-  number, and what to change when it feels wrong.
